@@ -5,7 +5,7 @@ data class PageCreateRequest(
     val icon: Icon,
     val cover: Cover,
     val properties: Properties,
-    val children: List<Block>,
+    val children: List<BlockResponse>,
 )
 
 data class TextContent(
@@ -25,10 +25,10 @@ data class ToDo(
 data class Heading2(
     val rich_text: List<RichTextContent>,
     val color: String? = "default",
-    val children: List<Block>? = null,
+    val children: List<BlockResponse>? = null,
 )
 
-data class Block(
+data class BlockResponse(
     val heading_2: Heading2? = null,
     val to_do: ToDo? = null,
 )

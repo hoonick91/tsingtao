@@ -39,3 +39,9 @@ out/
 ### Kotlin ###
 .kotlin
 /src/main/resources/application.yml
+/gradle/.tmp/
+/gradle/daemon/
+/gradle/jdks/
+/gradle/native/
+/gradle/wrapper/
+/gradle/wrapper/dists/

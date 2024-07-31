@@ -9,9 +9,5 @@ class NotionClientServiceTest @Autowired constructor(
     private val notionClientService: NotionClientService,
 ) {
 
-    @Test
-    fun createNotionPage() {
-        val response = notionClientService.createPage()
-        println()
-    }
+
 }

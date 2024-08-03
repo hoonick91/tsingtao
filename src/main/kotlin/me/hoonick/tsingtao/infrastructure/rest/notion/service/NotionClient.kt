@@ -3,11 +3,12 @@ package me.hoonick.tsingtao.infrastructure.rest.notion.service
 import com.fasterxml.jackson.databind.JsonNode
 import me.hoonick.tsingtao.infrastructure.rest.notion.dto.PageCreateRequest
 import me.hoonick.tsingtao.infrastructure.rest.notion.dto.PageCreateResponse
-import me.hoonick.tsingtao.infrastructure.rest.notion.dto.BlocksGetResponse
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.service.annotation.DeleteExchange
 import org.springframework.web.service.annotation.GetExchange
+import org.springframework.web.service.annotation.PatchExchange
 import org.springframework.web.service.annotation.PostExchange
 
 /**
@@ -22,5 +23,14 @@ interface NotionClient {
         @PathVariable("page_id") pageId: String,
         @RequestParam("page_size") pageSize: Int = 100,
     ): JsonNode
+
+    @PatchExchange("/v1/blocks/{block_id}/children")
+    fun updateBlock(
+        @PathVariable("block_id") blockId: String,
+        @RequestBody request: BlackAddChildrenRequest,
+    ): JsonNode
+
+    @DeleteExchange("/v1/blocks/{block_id}")
+    fun deleteBlockBy(@PathVariable("block_id") blockId: String)
 
 }

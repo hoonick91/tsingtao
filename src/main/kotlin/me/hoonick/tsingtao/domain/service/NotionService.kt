@@ -16,8 +16,14 @@ class NotionService(
         val recentPageId = notionPort.getChildPagesInBlocks(DAILY_PAGE_ID).last().id
         val heading2Blocks = notionPort.getBlocks(recentPageId, "heading_2")
 
-        val todoContent = getContent(heading2Blocks, "Todo")
-        val questionContent = getContent(heading2Blocks, "Question")
+        val todoBlockId = heading2Blocks.filter("Todo").first().id
+        val doneBlockId = heading2Blocks.filter("Done").first().id
+        val doneContent = getContent(heading2Blocks, "Todo").filterChecked()
+        notionPort.updateBlock(doneBlockId, doneContent)
+        notionPort.deleteBlock(todoBlockId, doneContent)
+
+        val todoContent = getContent(heading2Blocks, "Todo").filterUnchecked()
+        val questionContent = getContent(heading2Blocks, "Question").filterUnchecked()
 
         notionPort.createPage(
             mapOf("Todo" to todoContent, "Question" to questionContent)
@@ -28,7 +34,6 @@ class NotionService(
         val id = heading2Blocks.filter(fieldName).first().id
         return notionPort.getBlocks(id)
             .findBy("to_do")
-            .filterUnchecked()
     }
 
 
@@ -57,6 +62,16 @@ private fun List<Block>.filterUnchecked(): List<Block> {
     return this
         .filter {
             !it.detail.content
+                .get("checked")
+                .asBoolean()
+        }
+}
+
+private fun List<Block>.filterChecked(): List<Block> {
+    println()
+    return this
+        .filter {
+            it.detail.content
                 .get("checked")
                 .asBoolean()
         }

@@ -6,10 +6,13 @@ import me.hoonick.tsingtao.domain.ChildPage
 import me.hoonick.tsingtao.domain.Detail
 import me.hoonick.tsingtao.domain.port.out.NotionPort
 import me.hoonick.tsingtao.infrastructure.rest.notion.dto.*
+import me.hoonick.tsingtao.infrastructure.rest.notion.dto.Properties
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.util.*
 
 private val DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
@@ -33,6 +36,10 @@ class NotionClientService(
     }
 
     override fun createPage(blocks: Map<String, List<Block>>) {
+        val today = LocalDate.now()
+        val dayOfWeek = today.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.KOREAN)
+        val title = today.format(DATE_FORMAT) + "($dayOfWeek)"
+
         val request = PageCreateRequest(
             parent = Parent(page_id = "c63366bc-abdd-47b0-b463-db86acff3e49"),
             icon = Icon(emoji = "\uD83D\uDD5B"),
@@ -44,7 +51,7 @@ class NotionClientService(
             properties = Properties(
                 title = Title(
                     title = listOf(
-                        TitleElement(text = Text(content = LocalDate.now().format(DATE_FORMAT))),
+                        TitleElement(text = Text(content = title)),
                     )
                 )
             ),
@@ -138,6 +145,28 @@ class NotionClientService(
             )
         )
         notionClient.createPage(request)
+    }
+
+    override fun updateBlock(doneBlockId: String, doneContent: List<Block>) {
+        val request = BlackAddChildrenRequest(
+            children = doneContent.map {
+                BlockRequest(
+                    to_do = ToDoRequest(
+                        rich_text = listOf(
+                            RichTextRequest(text = TextContentRequest(content = it.detail.title)),
+                        ),
+                        checked = true
+                    ),
+                )
+            },
+        )
+        notionClient.updateBlock(doneBlockId, request)
+    }
+
+    override fun deleteBlock(todoBlockId: String, doneContent: List<Block>) {
+        doneContent.forEach {
+            notionClient.deleteBlockBy(it.id)
+        }
     }
 
 

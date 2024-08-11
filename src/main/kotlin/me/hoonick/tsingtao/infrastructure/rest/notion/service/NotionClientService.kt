@@ -5,16 +5,11 @@ import me.hoonick.tsingtao.domain.Block
 import me.hoonick.tsingtao.domain.ChildPage
 import me.hoonick.tsingtao.domain.Detail
 import me.hoonick.tsingtao.domain.port.out.NotionPort
-import me.hoonick.tsingtao.infrastructure.rest.notion.dto.*
-import me.hoonick.tsingtao.infrastructure.rest.notion.dto.Properties
+import me.hoonick.tsingtao.infrastructure.rest.notion.dto.BlockResponse
+import me.hoonick.tsingtao.infrastructure.rest.notion.dto.PageCreateRequest
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
-import java.util.*
-
-private val DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
 @Service
 class NotionClientService(
@@ -36,112 +31,14 @@ class NotionClientService(
     }
 
     override fun createPage(blocks: Map<String, List<Block>>) {
-        val today = LocalDate.now()
-        val dayOfWeek = today.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.KOREAN)
-        val title = today.format(DATE_FORMAT) + "($dayOfWeek)"
-
         val request = PageCreateRequest(
-            parent = Parent(page_id = "c63366bc-abdd-47b0-b463-db86acff3e49"),
-            icon = Icon(emoji = "\uD83D\uDD5B"),
-            cover = Cover(
-                external = External(
-                    url = "https://upload.wikimedia.org/wikipedia/commons/6/62/Tuscankale.jpg"
-                )
-            ),
-            properties = Properties(
-                title = Title(
-                    title = listOf(
-                        TitleElement(text = Text(content = title)),
-                    )
-                )
-            ),
             children = listOf(
-                BlockResponse(
-                    heading_2 = Heading2(
-                        rich_text = listOf(
-                            RichTextContent(text = TextContent(content = "\uD83D\uDFE9 Todo"))
-                        ),
-                        children =
-                        blocks["Todo"]?.map {
-                            BlockResponse(
-                                to_do = ToDo(
-                                    rich_text = listOf(
-                                        RichTextContent(text = TextContent(content = "${it.detail.title} #${it.createdAt.toLocalDate()}"))
-                                    ),
-                                    checked = false,
-                                )
-                            )
-                        }
-                    )
-                ),
-                BlockResponse(
-                    heading_2 = Heading2(
-                        rich_text = listOf(
-                            RichTextContent(text = TextContent(content = "✅ Done"))
-                        ),
-                        children = listOf(
-                            BlockResponse(
-                                to_do = ToDo(
-                                    rich_text = listOf(
-                                        RichTextContent(text = TextContent())
-                                    ),
-                                    checked = false,
-                                )
-                            )
-                        )
-                    )
-                ),
-                BlockResponse(
-                    heading_2 = Heading2(
-                        rich_text = listOf(
-                            RichTextContent(text = TextContent(content = "❓ Question"))
-                        ),
-                        children = blocks["Question"]?.map {
-                            BlockResponse(
-                                to_do = ToDo(
-                                    rich_text = listOf(
-                                        RichTextContent(text = TextContent(content = "${it.detail.title} #${it.createdAt.toLocalDate()}"))
-                                    ),
-                                    checked = false,
-                                )
-                            )
-                        }
-                    )
-                ),
-                BlockResponse(
-                    heading_2 = Heading2(
-                        rich_text = listOf(
-                            RichTextContent(text = TextContent(content = "\uD83D\uDC4B Backlog"))
-                        ),
-                        children = listOf(
-                            BlockResponse(
-                                to_do = ToDo(
-                                    rich_text = listOf(
-                                        RichTextContent(text = TextContent())
-                                    ),
-                                    checked = false,
-                                )
-                            )
-                        )
-                    )
-                ),
-                BlockResponse(
-                    heading_2 = Heading2(
-                        rich_text = listOf(
-                            RichTextContent(text = TextContent(content = "\uD83E\uDEA9 Event"))
-                        ),
-                        children = listOf(
-                            BlockResponse(
-                                to_do = ToDo(
-                                    rich_text = listOf(
-                                        RichTextContent(text = TextContent())
-                                    ),
-                                    checked = false,
-                                )
-                            )
-                        )
-                    )
-                )
+                BlockResponse.todo(blocks),
+                BlockResponse.done(blocks),
+                BlockResponse.question(blocks),
+                BlockResponse.information(blocks),
+                BlockResponse.backlog(blocks),
+                BlockResponse.event(blocks),
             )
         )
         notionClient.createPage(request)
@@ -179,7 +76,6 @@ private fun JsonNode.toBlocks(fieldName: String): List<Block> {
             Block(
                 id = it.get("id").asText(),
                 createdAt = it.get("created_time").toLocalDateTime(),
-                hasChildren = it.get("has_children").asBoolean(),
                 type = it.get("type").asText(),
                 detail = Detail(it.get(fieldName))
             )

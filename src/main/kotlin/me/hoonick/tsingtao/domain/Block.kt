@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 data class Block(
     val id: String,
     val createdAt: LocalDateTime,
-    val hasChildren: Boolean,
+    val children: List<Block>? = null,
     val type: String,
     val detail: Detail,
 ) {

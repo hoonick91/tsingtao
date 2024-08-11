@@ -12,7 +12,12 @@ class NotionServiceTest @Autowired constructor(
     private val notionService = NotionService(notionPort)
 
     @Test
-    fun test() {
+    fun daily() {
         notionService.createDailyPage()
+    }
+
+    @Test
+    fun weekly() {
+        notionService.createWeeklyPage()
     }
 }

@@ -1,4 +1,4 @@
-package me.hoonick.tsingtao.infrastructure.rest.notion.config
+package me.hoonick.me.hoonick.tsingtao.notion.infrastructure.rest.notion.config
 
 import mu.KLogger
 import mu.KotlinLogging

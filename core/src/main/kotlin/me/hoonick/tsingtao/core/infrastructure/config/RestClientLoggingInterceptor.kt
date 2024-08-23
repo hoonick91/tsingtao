@@ -1,8 +1,7 @@
-package me.hoonick.tsingtao.infrastructure.rest.notion.config
+package me.hoonick.tsingtao.core.infrastructure.config
 
 import mu.KLogger
 import mu.KotlinLogging
-import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.client.ClientHttpResponse
@@ -14,7 +13,7 @@ class RestClientLoggingInterceptor : ClientHttpRequestInterceptor {
     }
 
     override fun intercept(
-        request: HttpRequest,
+        request: org.springframework.http.HttpRequest,
         body: ByteArray,
         execution: ClientHttpRequestExecution,
     ): ClientHttpResponse {

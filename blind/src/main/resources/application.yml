@@ -1,0 +1,4 @@
+blind:
+  community-host: https://www.badaduo.net:4000
+  match-host: https://www.badaduo.net:18115
+  profile-host: https://www.badaduo.net:18112

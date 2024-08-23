@@ -1,9 +1,9 @@
-package me.hoonick.tsingtao.domain.service
+package me.hoonick.tsingtao.notion.domain.service
 
 import com.fasterxml.jackson.databind.JsonNode
-import me.hoonick.tsingtao.domain.Block
-import me.hoonick.tsingtao.domain.Detail
-import me.hoonick.tsingtao.domain.port.out.NotionPort
+import me.hoonick.me.hoonick.tsingtao.notion.domain.Block
+import me.hoonick.me.hoonick.tsingtao.notion.domain.Detail
+import me.hoonick.tsingtao.notion.domain.port.out.NotionPort
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -112,7 +112,6 @@ class NotionService(
     }
 
 
-
 }
 
 
@@ -127,9 +126,12 @@ private fun List<Block>.filter(fieldName: String): List<Block> {
 private fun List<Block>.filterUnchecked(): List<Block> {
     return this
         .filter {
-            !it.detail.content
+            val checked = it.detail.content
                 .get("checked")
-                .asBoolean()
+            if (checked != null) {
+                return@filter !checked.asBoolean()
+            }
+            return@filter false
         }
 }
 

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>User Profile</title>
+    <style>
+        table {
+            border-collapse: collapse; /* 테두리 간격을 없애서 선이 붙도록 설정 */
+            width: 100%; /* 테이블 너비를 전체로 설정 */
+        }
+        th, td {
+            border: 1px solid black; /* 셀 사이에 1px 검은색 선 추가 */
+            padding: 8px; /* 셀 내부 여백 추가 */
+            text-align: left; /* 셀의 텍스트를 왼쪽 정렬 */
+        }
+        th {
+            background-color: #f2f2f2; /* 헤더 셀의 배경 색상 설정 */
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9; /* 짝수 행에 배경 색상 추가 */
+        }
+    </style>
+</head>
+<body>
+<h1>User Profile</h1>
+
+<p><strong>Phone:</strong> <span th:text="${profile.phone}"></span></p>
+<p><strong>Nickname:</strong> <span th:text="${profile.nickname}"></span></p>
+<p><strong>Birthday:</strong> <span th:text="${profile.birthday}"></span></p>
+<p><strong>Job:</strong> <span th:text="${profile.job}"></span></p>
+<p><strong>Work:</strong> <span th:text="${profile.work}"></span></p>
+<p><strong>School:</strong> <span th:text="${profile.school}"></span></p>
+<p><strong>Tall:</strong> <span th:text="${profile.tall}"></span> cm</p>
+<p><strong>Smokes:</strong> <span th:text="${profile.smoke ? 'Yes' : 'No'}"></span></p>
+<p><strong>Last Login Date:</strong> <span th:text="${profile.lastLoginDate}"></span></p>
+<p><strong>Registration Date:</strong> <span th:text="${profile.regDate}"></span></p>
+<p><strong>Likes Received:</strong> <span th:text="${profile.getLikeCount}"></span></p>
+<p><strong>Likes Sent:</strong> <span th:text="${profile.sendLikeCount}"></span></p>
+<p><strong>Grade:</strong> <span th:text="${profile.grade}"></span></p>
+
+<h2>Introduction</h2>
+<p th:text="${profile.selfIntro}"></p>
+
+<h2>Address</h2>
+<p><strong>Home:</strong> <span th:text="${profile.address}"></span></p>
+<p><strong>Work:</strong> <span th:text="${profile.workAddress}"></span></p>
+
+<h2>Images</h2>
+<div>
+    <ul>
+        <li th:each="img : ${profile.images}">
+            <img th:src="${img}" alt="User Image" style="max-width: 700px;" />
+        </li>
+    </ul>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Category</th>
+        <th>Title</th>
+        <th>Content</th>
+        <th>Created At</th>
+        <th>Updated At</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="article : ${articles}">
+        <td th:text="${article.userId}"></td>
+        <td th:text="${article.category}"></td>
+        <td th:text="${article.title}"></td>
+        <td th:text="${article.content}"></td>
+        <td th:text="${article.createdAt}"></td>
+        <td th:text="${article.updatedAt}"></td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

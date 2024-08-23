@@ -45,3 +45,4 @@ out/
 /gradle/native/
 /gradle/wrapper/
 /gradle/wrapper/dists/
+/blind/

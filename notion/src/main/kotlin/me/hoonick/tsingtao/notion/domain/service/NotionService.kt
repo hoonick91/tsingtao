@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import me.hoonick.me.hoonick.tsingtao.notion.domain.Block
 import me.hoonick.me.hoonick.tsingtao.notion.domain.Detail
 import me.hoonick.tsingtao.notion.domain.port.out.NotionPort
+import org.springframework.stereotype.Service
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -12,6 +13,7 @@ import java.time.temporal.TemporalAdjusters
 
 private const val DAILY_PAGE_ID = "c63366bc-abdd-47b0-b463-db86acff3e49"
 
+@Service
 class NotionService(
     private val notionPort: NotionPort,
 ) {

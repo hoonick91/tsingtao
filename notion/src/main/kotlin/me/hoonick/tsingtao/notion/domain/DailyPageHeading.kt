@@ -4,9 +4,10 @@ enum class DailyPageHeading(
     val title: String,
     val maintainChildren: Boolean = false,
 ) {
-    OUTSTANDING("💪-Outstanding"),
-    BACKLOG("👋-Backlog", true),
+    OUTSTANDING("🚨-Outstanding"),
+    BACKLOG("📦-Backlog", true),
     TO_DO("🟩-Todo", true),
+    DOING("⏳-Doing", true),
     DONE("✅-Done", true),
     QUESTION("❓-Question", true),
     INFORMATION("💡-Information"),

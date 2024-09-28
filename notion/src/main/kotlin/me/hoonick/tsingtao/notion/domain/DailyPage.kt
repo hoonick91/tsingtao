@@ -21,7 +21,7 @@ data class DailyPage(
             .filter { it.type == BlockType.child_page }
             .maxByOrNull { it.contents?.text!! }!!
     }
-    
+
     fun getContents(): List<Block> {
         return this.blocks
     }
@@ -37,23 +37,6 @@ data class Block(
 ) {
     fun addAll(blocks: List<Block>) {
         this.contents?.addAll(blocks)
-    }
-
-    companion object {
-        fun emptyToDo(): Block {
-            return Block(
-                id = "",
-                parentId = "",
-                createdAt = LocalDateTime.now(),
-                hasChildren = false,
-                type = BlockType.to_do,
-                contents = Contents(
-                    type = ContentsType.text,
-                    text = "ㅇㅇㅇ",
-                    checked = false
-                )
-            )
-        }
     }
 
 }

@@ -32,8 +32,9 @@ class NotionService(
         dailyContents.removeOutstanding().saveTo(dailyPage.getChildDatabases("Outstanding").id)
         dailyContents.removeSolvedQuestions().saveTo(dailyPage.getChildDatabases("Solved questions").id)
 
-        dailyContents.moveDone()
-        dailyContents.moveBacklog()
+        dailyContents.moveNotTodoToBackLog()
+        dailyContents.moveDoingToDone()
+        dailyContents.moveDoingToTodo()
 
         notionPort.saveDailyPage(dailyContents)
     }

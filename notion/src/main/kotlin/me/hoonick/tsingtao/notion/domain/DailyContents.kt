@@ -24,26 +24,26 @@ data class DailyContents(
         return outstanding
     }
 
-    fun moveDone() {
-        val done = contents[DailyPageHeading.TO_DO]
+    fun moveDoingToDone() {
+        val done = contents[DailyPageHeading.DOING]
             ?.map { it.copy(contents = it.contents?.done()) }
             ?.onEach { it.contents?.addUpdatedAt() }
             ?.filterNot { it.contents?.childBlocks?.size == 0 }
             ?: emptyList()
         contents[DailyPageHeading.DONE] = (contents[DailyPageHeading.DONE] ?: listOf()) + done
 
-        val todo = contents[DailyPageHeading.TO_DO]
+        val doing = contents[DailyPageHeading.DOING]
             ?.filter { it.contents?.checked != true }
             ?.map { it.copy(contents = it.contents?.todo()) }
             ?.filterNot { it.type == BlockType.bulleted_list_item && it.contents?.childBlocks?.size == 0 }
             ?.toMutableList()
             ?: mutableListOf()
 
-        contents[DailyPageHeading.TO_DO] = if (todo.isEmpty()) listOf(Block.emptyToDo()) else todo
+        contents[DailyPageHeading.DOING] = if (doing.isEmpty()) listOf() else doing
     }
 
-    fun moveBacklog() {
-        val todo = contents[DailyPageHeading.TO_DO]
+    fun moveDoingToTodo() {
+        val todo = contents[DailyPageHeading.DOING]
             ?.filter { it.contents?.checked != true }
             ?.map { it.copy(contents = it.contents?.todo()) }
             ?.onEach { it.contents?.addStar() }
@@ -51,14 +51,31 @@ data class DailyContents(
             ?.toMutableList()
             ?: mutableListOf()
 
-        contents[DailyPageHeading.BACKLOG] = (contents[DailyPageHeading.BACKLOG] ?: listOf()) + todo
+        contents[DailyPageHeading.TO_DO] = (contents[DailyPageHeading.TO_DO] ?: listOf()) + todo
 
-        val done = contents[DailyPageHeading.TO_DO]
+        val done = contents[DailyPageHeading.DOING]
             ?.map { it.copy(contents = it.contents?.done()) }
             ?.onEach { it.contents?.addUpdatedAt() }
             ?.filterNot { it.contents?.childBlocks?.size == 0 }
             ?: emptyList()
 
-        contents[DailyPageHeading.TO_DO] = done.ifEmpty { listOf(Block.emptyToDo()) }
+        contents[DailyPageHeading.DOING] = done.ifEmpty { listOf() }
+    }
+
+    fun moveNotTodoToBackLog() {
+        val notTodo = contents[DailyPageHeading.TO_DO]
+            ?.filter { it.contents?.checked == true }
+            ?.filterNot { it.type == BlockType.bulleted_list_item && it.contents?.childBlocks?.size == 0 }
+            ?.toMutableList()
+            ?: mutableListOf()
+
+        contents[DailyPageHeading.BACKLOG] = (contents[DailyPageHeading.BACKLOG] ?: listOf()) + notTodo
+
+        val todo = contents[DailyPageHeading.TO_DO]
+            ?.filter { it.contents == null || it.contents.checked != true }
+            ?.onEach { it.contents?.addUpdatedAt() }
+            ?: emptyList()
+
+        contents[DailyPageHeading.TO_DO] = todo.ifEmpty { listOf() }
     }
 }

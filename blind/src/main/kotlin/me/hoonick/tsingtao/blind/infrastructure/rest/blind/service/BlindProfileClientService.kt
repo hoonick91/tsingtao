@@ -14,4 +14,9 @@ class BlindProfileClientService(
         val request = BlindProfileRequest(targetId)
          return blindProfileClient.getProfile(request).toBlindProfile()
     }
+
+    fun getLikedProfiles(targetId: String): Any {
+        return blindProfileClient.getLikedProfiles(targetId)
+        TODO("Not yet implemented")
+    }
 }

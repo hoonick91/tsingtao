@@ -44,7 +44,7 @@ data class Block(
 data class Contents(
     val type: ContentsType? = null,
     var text: String? = null,
-    val checked: Boolean? = null,
+    var checked: Boolean? = null,
     val childBlocks: MutableList<Block>? = mutableListOf(),
 ) {
     fun addAll(blocks: List<Block>) {
@@ -69,6 +69,12 @@ data class Contents(
 
     fun addStar() {
         this.text += "⭐"
+    }
+
+    fun checkTo(checked: Boolean) {
+        this.childBlocks?.forEach {
+            it.contents?.checked = checked
+        }
     }
 
 }

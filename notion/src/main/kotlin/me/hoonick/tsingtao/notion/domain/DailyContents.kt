@@ -64,10 +64,10 @@ data class DailyContents(
 
     fun moveNotTodoToBackLog() {
         val notTodo = contents[DailyPageHeading.TO_DO]
-            ?.filter { it.contents?.checked == true }
-            ?.filterNot { it.type == BlockType.bulleted_list_item && it.contents?.childBlocks?.size == 0 }
-            ?.toMutableList()
-            ?: mutableListOf()
+            ?.map { it.copy(contents = it.contents?.done()) }
+            ?.onEach { it.contents?.checkTo(false) }
+            ?.filterNot { it.contents?.childBlocks?.size == 0 }
+            ?: emptyList()
 
         contents[DailyPageHeading.BACKLOG] = (contents[DailyPageHeading.BACKLOG] ?: listOf()) + notTodo
 

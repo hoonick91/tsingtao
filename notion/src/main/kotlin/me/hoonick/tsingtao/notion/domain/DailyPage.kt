@@ -21,15 +21,7 @@ data class DailyPage(
             .filter { it.type == BlockType.child_page }
             .maxByOrNull { it.contents?.text!! }!!
     }
-
-    fun getContents(text: String): Block {
-        return this.blocks
-            .filter { it.contents != null }
-            .filter { it.contents!!.text != null }
-            .firstOrNull { it.contents!!.text!!.contains(text) }
-            ?: throw IllegalStateException("No contents")
-    }
-
+    
     fun getContents(): List<Block> {
         return this.blocks
     }

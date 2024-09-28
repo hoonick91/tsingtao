@@ -35,16 +35,16 @@ data class PageSaveRequest(
 
 data class BlockRequest(
     val toggle: Toggle? = null,
-    val heading_2: NewHeading2? = null,
-    val to_do: NewItem? = null,
-    val bulleted_list_item: NewItem? = null,
+    val heading_2: Heading2? = null,
+    val to_do: Item? = null,
+    val bulleted_list_item: Item? = null,
     val children: List<BlockRequest>? = null,
 ) {
     companion object {
         fun toDo(block: Block): BlockRequest {
             return BlockRequest(
 
-                to_do = NewItem(
+                to_do = Item(
                     rich_text = listOf(
                         RichTextContent(text = TextContent(content = "${block.contents?.text}"))
                     ),
@@ -56,7 +56,7 @@ data class BlockRequest(
 
         fun bulletedListItem(block: Block): BlockRequest {
             return BlockRequest(
-                bulleted_list_item = NewItem(
+                bulleted_list_item = Item(
                     rich_text = listOf(
                         RichTextContent(text = TextContent(content = "${block.contents?.text}"))
                     ),
@@ -67,7 +67,7 @@ data class BlockRequest(
 
         fun empty(): BlockRequest {
             return BlockRequest(
-                to_do = NewItem(
+                to_do = Item(
                     rich_text = listOf(
                         RichTextContent(text = TextContent(content = "ㅇㅇㅇ"))
                     ),
@@ -80,12 +80,25 @@ data class BlockRequest(
 
 }
 
+data class Parent(
+    val type: String? = null,
+    val page_id: String,
+)
+
+data class TextContent(
+    val content: String? = "ㅇㅇㅇ",
+)
+
+data class RichTextContent(
+    val text: TextContent,
+)
+
 data class Toggle(
     val rich_text: List<RichTextContent>,
     val color: String? = "default",
     val children: List<BlockRequest> = listOf(
         BlockRequest(
-            to_do = NewItem(
+            to_do = Item(
                 rich_text = listOf(
                     RichTextContent(text = TextContent())
                 ),
@@ -95,12 +108,12 @@ data class Toggle(
     ),
 )
 
-data class NewHeading2(
+data class Heading2(
     val rich_text: List<RichTextContent>,
     val color: String? = "default",
     val children: List<BlockRequest> = listOf(
         BlockRequest(
-            to_do = NewItem(
+            to_do = Item(
                 rich_text = listOf(
                     RichTextContent(text = TextContent())
                 ),
@@ -110,10 +123,55 @@ data class NewHeading2(
     ),
 )
 
-data class NewItem(
+data class Item(
     val rich_text: List<RichTextContent>,
     val checked: Boolean? = null,
     val color: String? = "default",
     val children: List<BlockRequest>? = null,
 )
 
+data class Icon(
+    val type: String? = null,
+    val emoji: String,
+)
+
+data class Cover(
+    val type: String? = null,
+    val external: External,
+)
+
+data class External(
+    val url: String,
+)
+
+data class Title(
+    val id: String? = null,
+    val type: String? = null,
+    val title: List<TitleElement>,
+)
+
+data class TitleElement(
+    val type: String? = null,
+    val text: Text,
+    val annotations: Annotations? = null,
+    val plain_text: String? = null,
+    val href: String? = null,
+)
+
+data class Text(
+    val content: String,
+    val link: String? = null,
+)
+
+data class Annotations(
+    val bold: Boolean,
+    val italic: Boolean,
+    val strikethrough: Boolean,
+    val underline: Boolean,
+    val code: Boolean,
+    val color: String,
+)
+
+data class Properties(
+    val title: Title,
+)

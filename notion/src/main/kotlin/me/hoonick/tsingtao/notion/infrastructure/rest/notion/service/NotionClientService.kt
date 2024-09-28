@@ -1,9 +1,8 @@
 package me.hoonick.tsingtao.notion.infrastructure.rest.notion.service
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.contains
-import me.hoonick.me.hoonick.tsingtao.notion.domain.ChildPage
+import me.hoonick.tsingtao.notion.domain.ChildPage
 import me.hoonick.tsingtao.notion.domain.*
 import me.hoonick.tsingtao.notion.domain.port.out.NotionPort
 import me.hoonick.tsingtao.notion.infrastructure.rest.notion.dto.*
@@ -12,15 +11,6 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-fun List<Block>.toChildren(): List<BlockRequest> {
-    return this.map { block ->
-        when (block.type) {
-            BlockType.to_do -> BlockRequest.toDo(block)
-            BlockType.bulleted_list_item -> BlockRequest.bulletedListItem(block)
-            else -> throw IllegalArgumentException()
-        }
-    }
-}
 
 @Service
 class NotionClientService(
@@ -100,49 +90,6 @@ class NotionClientService(
         return notionClient.getBlocks(pageId)
     }
 
-    override fun getBlocks(pageId: String, fieldName: String): List<OldBlock> {
-        val response = notionClient.getBlocks(pageId)
-        return response.toBlocks(fieldName)
-    }
-
-    override fun createPage(blocks: Map<String, List<OldBlock>>) {
-        val request = PageCreateRequest(
-            children = listOf(
-                BlockResponse.outstanding(blocks),
-                BlockResponse.todo(blocks),
-                BlockResponse.done(blocks),
-                BlockResponse.question(blocks),
-                BlockResponse.information(blocks),
-                BlockResponse.backlog(blocks),
-                BlockResponse.event(blocks),
-            )
-        )
-        println(ObjectMapper().writeValueAsString(request))
-        notionClient.createPage(request)
-    }
-
-    override fun updateBlock(doneBlockId: String, doneContent: List<OldBlock>) {
-        val request = BlackAddChildrenRequest(
-            children = doneContent.map {
-                BlockRequest(
-                    to_do = ToDoRequest(
-                        rich_text = listOf(
-                            RichTextRequest(text = TextContentRequest(content = it.detail.title)),
-                        ),
-                        checked = true
-                    ),
-                )
-            },
-        )
-        notionClient.updateBlock(doneBlockId, request)
-    }
-
-    override fun deleteBlock(todoBlockId: String, doneContent: List<OldBlock>) {
-        doneContent.forEach {
-            notionClient.deleteBlockBy(it.id)
-        }
-    }
-
     override fun savePageInDatabase(
         databaseId: String,
         outstandingAllChildBlocks: List<Block>,
@@ -201,18 +148,16 @@ class NotionClientService(
 
 }
 
-private fun JsonNode.toBlocks(fieldName: String): List<OldBlock> {
-    return this.get("results")
-        .filter { it.get("type").asText() == fieldName }
-        .map {
-            OldBlock(
-                id = it.get("id").asText(),
-                createdAt = it.get("created_time").toLocalDateTime(),
-                type = it.get("type").asText(),
-                detail = Detail(it.get(fieldName))
-            )
+fun List<Block>.toChildren(): List<BlockRequest> {
+    return this.map { block ->
+        when (block.type) {
+            BlockType.to_do -> BlockRequest.toDo(block)
+            BlockType.bulleted_list_item -> BlockRequest.bulletedListItem(block)
+            else -> throw IllegalArgumentException()
         }
+    }
 }
+
 
 private fun JsonNode.toLocalDateTime(): LocalDateTime {
     return LocalDateTime.parse(this.asText(), DateTimeFormatter.ISO_DATE_TIME)

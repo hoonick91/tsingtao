@@ -1,4 +1,4 @@
-package me.hoonick.me.hoonick.tsingtao.notion.infrastructure.rest.notion.config
+package me.hoonick.tsingtao.notion.infrastructure.rest.notion.config
 
 import org.springframework.http.client.ClientHttpResponse
 import java.io.ByteArrayInputStream

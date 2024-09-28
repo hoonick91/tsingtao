@@ -1,4 +1,4 @@
-package me.hoonick.me.hoonick.tsingtao.notion.domain
+package me.hoonick.tsingtao.notion.domain
 
 import java.time.LocalDateTime
 

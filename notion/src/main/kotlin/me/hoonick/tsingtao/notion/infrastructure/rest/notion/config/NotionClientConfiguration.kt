@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import me.hoonick.me.hoonick.tsingtao.notion.infrastructure.rest.notion.config.RestClientLoggingInterceptor
 import me.hoonick.tsingtao.notion.infrastructure.rest.notion.service.NotionClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean

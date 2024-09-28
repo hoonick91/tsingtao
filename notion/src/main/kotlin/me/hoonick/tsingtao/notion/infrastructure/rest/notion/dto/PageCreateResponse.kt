@@ -1,4 +1,4 @@
-package me.hoonick.me.hoonick.tsingtao.notion.infrastructure.rest.notion.dto
+package me.hoonick.tsingtao.notion.infrastructure.rest.notion.dto
 
 data class PageCreateResponse(
     val `object`: String,

@@ -2,23 +2,94 @@ package me.hoonick.tsingtao.notion.infrastructure.rest.notion.service
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import me.hoonick.me.hoonick.tsingtao.notion.domain.Block
+import com.fasterxml.jackson.module.kotlin.contains
 import me.hoonick.me.hoonick.tsingtao.notion.domain.ChildPage
-import me.hoonick.me.hoonick.tsingtao.notion.domain.Detail
+import me.hoonick.tsingtao.notion.domain.*
 import me.hoonick.tsingtao.notion.domain.port.out.NotionPort
-import me.hoonick.me.hoonick.tsingtao.notion.infrastructure.rest.notion.dto.BlockResponse
-import me.hoonick.me.hoonick.tsingtao.notion.infrastructure.rest.notion.dto.PageCreateRequest
-import me.hoonick.me.hoonick.tsingtao.notion.infrastructure.rest.notion.service.*
-import net.minidev.json.JSONUtil
+import me.hoonick.tsingtao.notion.infrastructure.rest.notion.dto.*
+import me.hoonick.tsingtao.notion.infrastructure.rest.notion.dto.BlockRequest
 import org.springframework.stereotype.Service
-import org.springframework.util.ObjectUtils
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+
+fun List<Block>.toChildren(): List<BlockRequest> {
+    return this.map { block ->
+        when (block.type) {
+            BlockType.to_do -> BlockRequest.toDo(block)
+            BlockType.bulleted_list_item -> BlockRequest.bulletedListItem(block)
+            else -> throw IllegalArgumentException()
+        }
+    }
+}
 
 @Service
 class NotionClientService(
     private val notionClient: NotionClient,
 ) : NotionPort {
+
+    override fun saveDailyPage(contents: DailyContents) {
+        val request = PageSaveRequest(
+            children = contents.contents.entries
+                .map {
+                    BlockRequest(
+                        toggle = Toggle(
+                            rich_text = listOf(
+                                RichTextContent(text = TextContent(content = it.key.title))
+                            ),
+                            children = if (it.key.maintainChildren) it.value.toChildren() else listOf(BlockRequest.empty())
+                        )
+                    )
+                }
+        )
+        notionClient.savePage(request)
+    }
+
+
+    override fun getChildrenBlocks(pageId: String): DailyPage {
+        val response = notionClient.getBlocks(pageId)
+        return DailyPage(blocks =
+        response.get("results")
+            .map {
+                Block(
+                    id = it.get("id").asText(),
+                    parentId = getParentId(it),
+                    createdAt = LocalDateTime.parse(
+                        it.get("created_time").asText(),
+                        DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                    ),
+                    hasChildren = it.get("has_children").asBoolean(),
+                    type = BlockType.valueOf(it.get("type").asText()),
+                    contents = getContents(it, BlockType.valueOf(it.get("type").asText()))
+                )
+            }
+        )
+    }
+
+    private fun getParentId(it: JsonNode): String {
+        val parent = it.get("parent")
+        if (parent.get("page_id") != null) return parent.get("page_id").asText()
+        if (parent.get("block_id") != null) return parent.get("block_id").asText()
+        throw IllegalStateException("no parent.")
+    }
+
+    private fun getContents(block: JsonNode, type: BlockType): Contents? {
+        val contents = block.get(type.name) ?: return null
+        if (contents.get("rich_text") != null) {
+            val richText = contents.get("rich_text")
+            val richTextFirst = richText.firstOrNull() ?: return null
+            return Contents(
+                type = ContentsType.valueOf(richTextFirst.get("type").asText()),
+                checked = if (contents.contains("checked")) contents.get("checked").asBoolean() else null,
+                text = richTextFirst.get("text").get("content").asText()
+            )
+        }
+
+        if (contents.get("title") != null) {
+            return Contents(type = ContentsType.text, text = contents.get("title").asText())
+        }
+
+        return Contents()
+    }
 
     override fun getChildPagesInBlocks(pageId: String): List<ChildPage> {
         val response = notionClient.getBlocks(pageId)
@@ -29,14 +100,15 @@ class NotionClientService(
         return notionClient.getBlocks(pageId)
     }
 
-    override fun getBlocks(pageId: String, fieldName: String): List<Block> {
+    override fun getBlocks(pageId: String, fieldName: String): List<OldBlock> {
         val response = notionClient.getBlocks(pageId)
         return response.toBlocks(fieldName)
     }
 
-    override fun createPage(blocks: Map<String, List<Block>>) {
+    override fun createPage(blocks: Map<String, List<OldBlock>>) {
         val request = PageCreateRequest(
             children = listOf(
+                BlockResponse.outstanding(blocks),
                 BlockResponse.todo(blocks),
                 BlockResponse.done(blocks),
                 BlockResponse.question(blocks),
@@ -49,7 +121,7 @@ class NotionClientService(
         notionClient.createPage(request)
     }
 
-    override fun updateBlock(doneBlockId: String, doneContent: List<Block>) {
+    override fun updateBlock(doneBlockId: String, doneContent: List<OldBlock>) {
         val request = BlackAddChildrenRequest(
             children = doneContent.map {
                 BlockRequest(
@@ -65,20 +137,75 @@ class NotionClientService(
         notionClient.updateBlock(doneBlockId, request)
     }
 
-    override fun deleteBlock(todoBlockId: String, doneContent: List<Block>) {
+    override fun deleteBlock(todoBlockId: String, doneContent: List<OldBlock>) {
         doneContent.forEach {
             notionClient.deleteBlockBy(it.id)
         }
     }
 
+    override fun savePageInDatabase(
+        databaseId: String,
+        outstandingAllChildBlocks: List<Block>,
+    ) {
+        outstandingAllChildBlocks
+            .filter { it.contents != null }
+            .map {
+                PageCreateRequest2(
+                    parent = Parent(
+                        type = "database_id",
+                        databaseId = databaseId
+                    ),
+                    properties = mapOf(
+                        "Name" to Title(
+                            title = listOf(
+                                Title.TitleText(text = Title.TitleText.TextContent(content = it.contents!!.text))
+                            )
+                        )
+                    ),
+                    children = it.contents.childBlocks
+                        ?.filter { child -> child.contents != null }
+                        ?.map { child ->
+                            mapOf(
+                                child.type.name to BulletedListItem(
+                                    richText = listOf(
+                                        RichText(
+                                            text = RichText.Text(
+                                                content = child.contents!!.text
+                                            )
+                                        )
+                                    ),
+                                    children = child.contents.childBlocks
+                                        ?.filter { grandChild -> grandChild.contents != null }
+                                        ?.map { grandChild ->
+                                            mapOf(
+                                                grandChild.type.name to BulletedListItem(
+                                                    richText = listOf(
+                                                        RichText(
+                                                            text = RichText.Text(
+                                                                content = grandChild.contents!!.text
+                                                            )
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        }
+                                )
+                            )
+                        } ?: emptyList()
+
+                )
+            }
+            .forEach { request -> notionClient.createPage2(request) }
+    }
+
 
 }
 
-private fun JsonNode.toBlocks(fieldName: String): List<Block> {
+private fun JsonNode.toBlocks(fieldName: String): List<OldBlock> {
     return this.get("results")
         .filter { it.get("type").asText() == fieldName }
         .map {
-            Block(
+            OldBlock(
                 id = it.get("id").asText(),
                 createdAt = it.get("created_time").toLocalDateTime(),
                 type = it.get("type").asText(),

@@ -1,4 +1,4 @@
-package me.hoonick.me.hoonick.tsingtao.notion.infrastructure.rest.notion.service
+package me.hoonick.tsingtao.notion.infrastructure.rest.notion.service
 
 
 data class TextContentRequest(

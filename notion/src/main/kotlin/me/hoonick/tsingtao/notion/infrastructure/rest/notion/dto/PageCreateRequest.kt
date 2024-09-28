@@ -1,14 +1,13 @@
-package me.hoonick.me.hoonick.tsingtao.notion.infrastructure.rest.notion.dto
+package me.hoonick.tsingtao.notion.infrastructure.rest.notion.dto
 
-import me.hoonick.me.hoonick.tsingtao.notion.domain.Block
+import me.hoonick.tsingtao.notion.domain.OldBlock
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.*
 
 private val DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-
-fun getTitle(): String {
+fun getTitle1(): String {
     val today = LocalDate.now()
     val dayOfWeek = today.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.KOREAN)
     return today.format(DATE_FORMAT) + "($dayOfWeek)"
@@ -25,12 +24,14 @@ data class PageCreateRequest(
     val properties: Properties = Properties(
         title = Title(
             title = listOf(
-                TitleElement(text = Text(content = getTitle())),
+                TitleElement(text = Text(content = getTitle1())),
             )
         )
     ),
     val children: List<BlockResponse>,
-)
+) {
+
+}
 
 
 data class TextContent(
@@ -70,7 +71,17 @@ data class BlockResponse(
     val children: List<BlockResponse>? = null,
 ) {
     companion object {
-        fun todo(blocks: Map<String, List<Block>>): BlockResponse {
+        fun outstanding(blocks: Map<String, List<OldBlock>>): BlockResponse {
+            return BlockResponse(
+                heading_2 = Heading2(
+                    rich_text = listOf(
+                        RichTextContent(text = TextContent(content = "\uD83D\uDD79\uFE0F Outstanding"))
+                    )
+                )
+            )
+        }
+
+        fun todo(blocks: Map<String, List<OldBlock>>): BlockResponse {
             return BlockResponse(
                 heading_2 = Heading2(
                     rich_text = listOf(
@@ -82,7 +93,7 @@ data class BlockResponse(
             )
         }
 
-        private fun from(it: Block): BlockResponse {
+        private fun from(it: OldBlock): BlockResponse {
             return when (it.type) {
                 "to_do" -> BlockResponse(
                     to_do = Item(
@@ -107,11 +118,12 @@ data class BlockResponse(
                         }
                     ),
                 )
+
                 else -> BlockResponse()
             }
         }
 
-        fun done(blocks: Map<String, List<Block>>): BlockResponse {
+        fun done(blocks: Map<String, List<OldBlock>>): BlockResponse {
             return BlockResponse(
                 heading_2 = Heading2(
                     rich_text = listOf(
@@ -121,7 +133,7 @@ data class BlockResponse(
             )
         }
 
-        fun question(blocks: Map<String, List<Block>>): BlockResponse {
+        fun question(blocks: Map<String, List<OldBlock>>): BlockResponse {
             return BlockResponse(
                 heading_2 = Heading2(
                     rich_text = listOf(
@@ -141,7 +153,7 @@ data class BlockResponse(
             )
         }
 
-        fun backlog(blocks: Map<String, List<Block>>): BlockResponse {
+        fun backlog(blocks: Map<String, List<OldBlock>>): BlockResponse {
             return BlockResponse(
                 heading_2 = Heading2(
                     rich_text = listOf(
@@ -151,7 +163,7 @@ data class BlockResponse(
             )
         }
 
-        fun event(blocks: Map<String, List<Block>>): BlockResponse {
+        fun event(blocks: Map<String, List<OldBlock>>): BlockResponse {
             return BlockResponse(
                 heading_2 = Heading2(
                     rich_text = listOf(
@@ -161,7 +173,7 @@ data class BlockResponse(
             )
         }
 
-        fun information(blocks: Map<String, List<Block>>): BlockResponse {
+        fun information(blocks: Map<String, List<OldBlock>>): BlockResponse {
             return BlockResponse(
                 heading_2 = Heading2(
                     rich_text = listOf(

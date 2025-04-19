@@ -7,12 +7,14 @@ import org.springframework.stereotype.Service
 
 @Service
 class BlindProfileClientService(
-    private val blindProfileClient: BlindProfileClient
+    private val blindProfileClient: BlindProfileClient,
 ) {
 
-    fun getProfile(targetId: String) : BlindProfile {
+    fun getProfile(targetId: String): BlindProfile {
         val request = BlindProfileRequest(targetId)
-         return blindProfileClient.getProfile(request).toBlindProfile()
+        val response = blindProfileClient.getProfile(request)
+
+        return response.toBlindProfile()
     }
 
     fun getLikedProfiles(targetId: String): Any {

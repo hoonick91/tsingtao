@@ -44,6 +44,7 @@
 <p><strong>Home:</strong> <span th:text="${profile.address}"></span></p>
 <p><strong>Work:</strong> <span th:text="${profile.workAddress}"></span></p>
 
+
 <h2>Images</h2>
 <div>
     <ul>
@@ -66,7 +67,7 @@
     </thead>
     <tbody>
     <tr th:each="article : ${articles}">
-        <td th:text="${article.userId}"></td>
+        <td th:text="${article.id}"></td>
         <td th:text="${article.category}"></td>
         <td th:text="${article.title}"></td>
         <td th:text="${article.content}"></td>

@@ -8,11 +8,13 @@ data class BlindProfileResponse(
     val profileData: List<Profile>,
     val accessList: List<Any>,
     val fileList: List<FileData>,
+    val likeDenyButtonString: String? = null,
+    val likeHoldButtonString: String? = null,
 ) {
     fun toBlindProfile(): BlindProfile {
         val profileData = this.profileData.get(0)
         return BlindProfile(
-            phone = profileData.phone,
+            phone = convertPhoneNumber(profileData.phone),
             nickname = profileData.nick_name,
             birthday = profileData.birth_day,
             job = profileData.job,
@@ -33,6 +35,15 @@ data class BlindProfileResponse(
             }
         )
 
+    }
+
+    private fun convertPhoneNumber(phoneNumber: String): String {
+        // 입력된 전화번호가 11자리여야 함
+        if (phoneNumber.length == 11) {
+            return phoneNumber.replace(Regex("(\\d{3})(\\d{4})(\\d{4})"), "$1-$2-$3")
+        }
+        // 잘못된 입력 처리
+        return "Invalid phone number"
     }
 
 }
@@ -152,6 +163,7 @@ data class Profile(
     val has_profile: Int,
     val birth_day_string: String,
     val age_string: String,
+    val by_block: String,
 ) {
 
 }

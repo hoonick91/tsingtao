@@ -20,5 +20,8 @@ data class ArticleResponse(
     val updatedAt: String,
     val deletedAt: String?, // Nullable because it can be null
     val post_reply_count: Int,
-    val user_type: Int
+    val user_type: Int,
+    val post_deleted: String?,
+    val post_deleted_by: String?,
+    val deleted_title: String?,
 )

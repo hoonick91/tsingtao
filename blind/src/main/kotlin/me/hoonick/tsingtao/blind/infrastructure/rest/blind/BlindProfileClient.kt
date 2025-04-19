@@ -7,7 +7,7 @@ import org.springframework.web.service.annotation.PostExchange
 
 interface BlindProfileClient {
     @PostExchange("/api/user/profile")
-    fun getProfile(@RequestBody request: BlindProfileRequest) : BlindProfileResponse
-    
+    fun getProfile(@RequestBody request: BlindProfileRequest): BlindProfileResponse
+
     fun getLikedProfiles(targetId: String)
 }
